@@ -1,0 +1,33 @@
+#!/bin/sh
+
+#   POSIX compliant script to capture 'TODO's in source code and automatically
+#   create issues.
+#   Copyright (C) 2022 Nicolai Brand 
+#   
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#   
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#   
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+# first match any comment (// or /* or #)
+# then match any witespace after comment decleration
+regex="(\/\/|\/\*|#)\s*?TODO:?"
+ignore="$(cat .gitignore)"
+
+for file in $(find *)
+do
+    # skip if filename in .gitignore
+    [ $(echo "$ignore" | grep -v "$file") ] || continue
+    # skip if filename is this file
+    [ "./$file" = "$0" ] && continue
+    grep "$regex" "$file"
+done
