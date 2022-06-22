@@ -26,11 +26,13 @@ ignore="$(cat .gitignore)"
 
 mkdir -p "issues"
 
+i=0
 for file in $(find *)
 do
     # skip if filename in .gitignore
-    [ $(echo "$ignore" | grep -v "$file") ] || continue
+    # [ $(echo "$ignore" | grep -v "$file") ] || continue
     # skip if filename is this file
     [ "./$file" = "$0" ] && continue
-    grep -oP "$regex" "$file" | awk '{print $0 > "issues/"NR".txt"}'
+    grep -oP "$regex" "$file" | awk -v f="${file##*/}" '{print $0 > "issues/"f".txt"}'
+
 done
