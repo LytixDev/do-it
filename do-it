@@ -18,10 +18,13 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# first match any comment (// or /* or #)
-# then match any witespace after comment decleration
-regex="(\/\/|\/\*|#)\s*?TODO:?"
+# 1. first match any comment (// or /* or #)
+# 2. then match any witespace after comment decleration
+# 3. then keep the stuff to the right of the match
+regex="((\/\/|\/\*|#)\s*?TODO:?)\K.*"
 ignore="$(cat .gitignore)"
+
+mkdir -p "issues"
 
 for file in $(find *)
 do
@@ -29,5 +32,5 @@ do
     [ $(echo "$ignore" | grep -v "$file") ] || continue
     # skip if filename is this file
     [ "./$file" = "$0" ] && continue
-    grep "$regex" "$file"
+    grep -oP "$regex" "$file" | awk '{print $0 > "issues/"NR".txt"}'
 done
