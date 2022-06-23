@@ -21,8 +21,8 @@
 # 1. first match any comment (// or /* or #)
 # 2. then match any witespace after comment decleration
 # 3. then keep the stuff to the right of the match
-regex="((\/\/|\/\*|#)\s*?TODO:?)\K.*"
-ignore="$(cat .gitignore)"
+regex="((\/\/|\/\*|#)\s*?TODO:?(\s*)?)\K.*"
+#ignore="$(cat .gitignore)"
 
 mkdir -p "issues"
 
@@ -33,6 +33,6 @@ do
     # [ $(echo "$ignore" | grep -v "$file") ] || continue
     # skip if filename is this file
     [ "./$file" = "$0" ] && continue
-    grep -oP "$regex" "$file" | awk -v f="${file##*/}" '{print $0 > "issues/"f".txt"}'
+    grep -oP "$regex" "$file" 2>/dev/null | awk -v f="${file##*/}" '{print f "-" NR ": " $0 > "issues/"f".txt"}'
 
 done
