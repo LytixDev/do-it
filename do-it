@@ -22,7 +22,6 @@
 # 2. then match any witespace after comment decleration
 # 3. then keep the stuff to the right of the match
 regex="((\/\/|\/\*|#)\s*?(?i)TODO:?(\s*)?)\K.*"
-#ignore="$(cat .gitignore)"
 
 for file in $(find *)
 do
