@@ -1,34 +1,43 @@
 #!/bin/sh
 
-#   POSIX compliant script to capture 'TODO's in source code and automatically
-#   create issues.
-#   Copyright (C) 2022 Nicolai Brand 
-#   
-#   This program is free software: you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation, either version 3 of the License, or
-#   (at your option) any later version.
-#   
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#   
-#   You should have received a copy of the GNU General Public License
-#   along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
+#  POSIX compliant script to capture 'TODO's in source code and automatically
+#  create issues.
+#  Copyright (C) 2022 Nicolai Brand 
+#  
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # 1. first match any comment (// or /* or #)
 # 2. then match any witespace after comment decleration
 # 3. then keep the stuff to the right of the match
 regex="((\/\/|\/\*|#)\s*?(?i)TODO:?(\s*)?)\K.*"
+out_file="issues.txt"
+
+if [ -f $out_file ]
+then
+    printf "$out_file already exitst. Delete it? [Y/n]: "
+    read ans
+    [ $ans = "n" ] 2>/dev/null && echo "Exiting..." && exit 0
+    rm $out_file && touch $out_file
+fi
 
 for file in $(find *)
 do
     # skip if filename in .gitignore
-    # grep -v "$file" ".gitignore" || continue
+    grep -x "$file" "./.gitignore" >/dev/null && continue
     # skip if filename is this file
     [ "./$file" = "$0" ] && continue
-    grep -oPn "$regex" "$file" 2>/dev/null | awk -v f="${file##*/}" '{print f " @ line " $0 >> "issues.txt"}'
-
+    grep -oPn "$regex" "$file" 2>/dev/null | sed "s/^/${file##*/} @ line /" >> issues.txt 
 done
+
+echo "Found $(wc -l < $out_file) TODO's and wrote them to $out_file"
